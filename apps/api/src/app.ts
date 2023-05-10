@@ -24,7 +24,7 @@ export const expressAppSetup = async (dataSource: DataSource) => {
       route.route,
       (req: Request, res: Response, next: () => void) => {
         const controller = new route.controller();
-        const invokeResult: Promise<any> = controller[route.action](
+        const invokeResult: Promise<unknown> = controller[route.action](
           req,
           res,
           next
