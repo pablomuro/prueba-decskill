@@ -40,3 +40,6 @@ Thumbs.db
 
 # config
 .env
+*.sqlite
+
+stuff.txt
