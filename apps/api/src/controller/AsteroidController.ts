@@ -1,3 +1,4 @@
+import { mockData } from './../../mockData';
 import axios from 'axios';
 import type { Request, Response } from 'express';
 import { AsteroidFavorite } from '../entity/AsteroidFavorite';
@@ -23,7 +24,7 @@ const getLookupApiUrl = (neoId: number) => {
 
 export class AsteroidController {
   public async index(request: Request, res: Response) {
-    const { startDate, endDate }: ApiFilter = request.body;
+    const { startDate, endDate }: ApiFilter = request.query;
 
     const { data, status } = await axios.get<NasaApiResponse>(
       getFeedApiUrl({ startDate, endDate })
@@ -40,64 +41,56 @@ export class AsteroidController {
     return res.json({ data: asteroidsArray, count: element_count, links });
   }
 
-  public async lookUp(request: Request, res: Response) {
-    // TODO - get id from request, search fav do banco e pesquisar neoId do asteroid salvo
-    const neoId = this.t();
-    const url = getLookupApiUrl(neoId);
-    const { data, status } = await axios.get<NasaApiResponse>(url);
+  async listFavorites(request: Request, res: Response) {
+    const asteroidList = await AsteroidFavorite.find();
 
-    return res.json(data);
+    if (!asteroidList.length) throw Error('Empty');
+
+    res.json(asteroidList);
   }
+  async createFavorite(request: Request, res: Response) {
+    const {
+      id,
+      name,
+      absolute_magnitude_h,
+      is_potentially_hazardous_asteroid,
+    } = request.body;
 
-  private t() {
-    return 3542519;
-  }
+    validateId(Number(id));
+    validateText(name);
+    validateText(absolute_magnitude_h);
 
-  async create(request: Request) {
-    const { asteroid: asteroidName } = request.body;
+    const asteroid = await AsteroidFavorite.findOneBy({ asteroidNeoId: id });
 
-    validateText(asteroidName);
+    if (asteroid) throw false;
 
-    const asteroid = Object.assign(new AsteroidFavorite(), {
-      asteroidName,
+    const newAsteroid = Object.assign(new AsteroidFavorite(), {
+      asteroidName: name,
+      asteroidNeoId: id,
+      absoluteMagnitudeH: absolute_magnitude_h,
+      isPotentiallyHazardousAsteroid: is_potentially_hazardous_asteroid,
     });
 
-    return asteroid.save();
+    newAsteroid.save();
+
+    res.json(true);
   }
 
-  async update(request: Request) {
-    const { number, asteroid: asteroidName } = request.body;
-    validateId(parseInt(number, 10));
-    validateText(asteroidName);
+  public async getFavorite(request: Request, res: Response) {
+    const { id } = request.params;
 
-    const id = parseInt(number, 10);
+    validateId(Number(id));
 
-    const asteroid = await AsteroidFavorite.findOneBy({ id });
+    const asteroid = await AsteroidFavorite.findOneBy({
+      id: Number(id),
+    });
 
-    if (!asteroid) {
-      throw Error(NOT_FOUND_MSG);
-    }
+    const { data, status } = await axios.get<NasaApiResponse>(
+      getLookupApiUrl(asteroid.asteroidNeoId)
+    );
 
-    asteroid.asteroidName = asteroidName;
-    await asteroid.save();
+    if (status !== 200) res.status(status).json(NOT_FOUND_MSG);
 
-    return asteroid;
-  }
-
-  async delete(request: Request) {
-    const { number } = request.body;
-    validateId(parseInt(number, 10));
-
-    const id = parseInt(number, 10);
-
-    const asteroid = await AsteroidFavorite.findOneBy({ id });
-
-    if (!asteroid) {
-      throw Error(NOT_FOUND_MSG);
-    }
-
-    await asteroid.remove();
-
-    return 'Deleted';
+    return res.json(data);
   }
 }

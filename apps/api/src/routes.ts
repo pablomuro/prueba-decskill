@@ -9,26 +9,20 @@ const AsteroidRoutes = [
   },
   {
     method: 'get',
-    route: '/lookUp',
-    action: 'lookUp',
+    route: '/favorite',
+    action: 'listFavorites',
+    controller: AsteroidController,
+  },
+  {
+    method: 'get',
+    route: '/favorite/:id',
+    action: 'getFavorite',
     controller: AsteroidController,
   },
   {
     method: 'post',
-    route: '/',
-    action: 'create',
-    controller: AsteroidController,
-  },
-  {
-    method: 'put',
-    route: '/',
-    action: 'update',
-    controller: AsteroidController,
-  },
-  {
-    method: 'delete',
-    route: '/',
-    action: 'delete',
+    route: '/addAsteroidToFavorite',
+    action: 'createFavorite',
     controller: AsteroidController,
   },
 ];

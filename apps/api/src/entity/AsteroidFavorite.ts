@@ -6,8 +6,14 @@ export class AsteroidFavorite extends BaseEntity {
   id!: number;
 
   @Column()
+  asteroidNeoId!: number;
+
+  @Column()
   asteroidName!: string;
 
   @Column()
-  asteroidNeoId!: number;
+  absoluteMagnitudeH!: string;
+
+  @Column()
+  isPotentiallyHazardousAsteroid!: boolean;
 }
