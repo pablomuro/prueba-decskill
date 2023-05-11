@@ -3,8 +3,8 @@
   "version": "0.0.0",
   "license": "MIT",
   "scripts": {
-    "server-api": "nx serve api",
-    "server-frontend": "nx serve frontend"
+    "serve-api": "nx serve api",
+    "serve-frontend": "nx serve frontend"
   },
   "private": true,
   "devDependencies": {
