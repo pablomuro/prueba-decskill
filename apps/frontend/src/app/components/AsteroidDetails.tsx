@@ -11,6 +11,14 @@ import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { fetchParser } from '../../helpers/fetchMiddlaware';
 import Title from './Title';
 
+function Loading() {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'center' }}>
+      <CircularProgress color="inherit" />
+    </div>
+  );
+}
+
 export function AsteroidDetails() {
   const location = useLocation();
   const { id } = useParams();
@@ -23,38 +31,36 @@ export function AsteroidDetails() {
 
   const navigate = useNavigate();
   useEffect(() => {
-    if (asteroidData == null && id && isFetching === false) {
-      setIsFetching(true);
-      fetch(`/api/favorite/${id}`)
-        .then(fetchParser)
-        .then((res: AsteroidData) => {
-          console.log(res);
-          setAsteroidData(() => res);
-          setIsFetching(false);
-        })
-        .catch((err) => {
-          setError(err);
-          setIsFetching(false);
-        });
-    }
-  }, [asteroidData, id, isFetching]);
+    const getFavoriteData = async () => {
+      try {
+        setIsFetching(true);
+        const res = await fetch(`/api/favorite/${id}`);
 
-  console.log(asteroidData?.is_potentially_hazardous_asteroid);
+        const result: AsteroidData = await fetchParser(res);
+        if (result) {
+          setAsteroidData(() => result);
+          setIsFetching(false);
+        } else {
+          setError(Error('Not Found'));
+        }
+      } catch (err) {
+        // debugger;
+        setError(err as Error);
+        setIsFetching(false);
+      }
+    };
+
+    if (!id) return;
+
+    getFavoriteData();
+  }, [id]);
 
   const getCloseApproachDate = (asteroidData: AsteroidData) =>
     asteroidData.close_approach_data[
       asteroidData.close_approach_data.length - 1
     ].close_approach_date;
 
-  if (isFetching) {
-    return (
-      <div style={{ display: 'flex', justifyContent: 'center' }}>
-        <CircularProgress color="inherit" />
-      </div>
-    );
-  }
   if (error) {
-    setError(null);
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <h1>{error.message}</h1>
@@ -114,6 +120,7 @@ export function AsteroidDetails() {
       </Fragment>
     );
 
-  // eslint-disable-next-line react/jsx-no-useless-fragment
-  return <></>;
+  if (isFetching) return <Loading />;
+
+  return <Loading />;
 }

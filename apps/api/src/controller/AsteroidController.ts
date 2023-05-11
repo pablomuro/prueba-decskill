@@ -30,7 +30,7 @@ export class AsteroidController {
       getFeedApiUrl({ startDate, endDate })
     );
 
-    if (status !== 200) res.status(status).json(NOT_FOUND_MSG);
+    if (status !== 200) return res.status(status).json(NOT_FOUND_MSG);
 
     const { near_earth_objects = {}, element_count = 0, links = {} } = data;
 
@@ -43,8 +43,6 @@ export class AsteroidController {
 
   async listFavorites(request: Request, res: Response) {
     const asteroidList = await AsteroidFavorite.find();
-
-    if (!asteroidList.length) throw Error('Empty');
 
     res.json(asteroidList);
   }
@@ -85,11 +83,13 @@ export class AsteroidController {
       id: Number(id),
     });
 
+    if (!asteroid) throw Error(NOT_FOUND_MSG);
+
     const { data, status } = await axios.get<NasaApiResponse>(
       getLookupApiUrl(asteroid.asteroidNeoId)
     );
 
-    if (status !== 200) res.status(status).json(NOT_FOUND_MSG);
+    if (status !== 200) return res.status(status).json(NOT_FOUND_MSG);
 
     return res.json(data);
   }

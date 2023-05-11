@@ -33,7 +33,7 @@ export const dataTableColumns: GridColDef[] = [
     field: 'id',
     headerName: 'Neo Id',
     flex: 1,
-    minWidth: 150,
+    minWidth: 50,
   },
   {
     field: 'name',

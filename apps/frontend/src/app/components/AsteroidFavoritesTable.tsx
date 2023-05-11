@@ -1,15 +1,16 @@
 import { CircularProgress } from '@mui/material';
 import { DataGrid, GridColDef, GridEventListener } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
-import { fetchParser } from '../../helpers/fetchMiddlaware';
 import { useNavigate } from 'react-router-dom';
+import { fetchParser } from '../../helpers/fetchMiddlaware';
+import { AsteroidFavoriteType } from '@monorepo/types';
 
 const favColumns: GridColDef[] = [
   {
     field: 'asteroidNeoId',
     headerName: 'Neo Id',
     flex: 1,
-    minWidth: 150,
+    minWidth: 50,
   },
   {
     field: 'asteroidName',
@@ -33,7 +34,9 @@ const favColumns: GridColDef[] = [
 ];
 
 export function AsteroidFavoritesTable() {
-  const [asteroidsList, setAsteroidsList] = useState<any[]>([]);
+  const [asteroidsList, setAsteroidsList] = useState<AsteroidFavoriteType[]>(
+    []
+  );
 
   const [isFetching, setIsFetching] = useState<boolean>(true);
   const [error, setError] = useState<Error | null>(null);
@@ -43,8 +46,7 @@ export function AsteroidFavoritesTable() {
   const fetchApiData = () => {
     fetch('/api/favorite')
       .then(fetchParser)
-      .then((res: any[]) => {
-        console.log(res);
+      .then((res: AsteroidFavoriteType[]) => {
         setAsteroidsList(() => res);
         setIsFetching(false);
       })
@@ -66,7 +68,6 @@ export function AsteroidFavoritesTable() {
     );
   }
   if (error) {
-    setError(null);
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <h1>{error.message}</h1>
