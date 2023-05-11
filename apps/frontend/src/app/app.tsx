@@ -1,61 +1,40 @@
-// eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { useEffect, useState } from 'react';
+import Dashboard from './components/Dashboard';
+import { AsteroidDetails } from './components/AsteroidDetails';
+import { FilterProvider } from './context/FilterContext';
+import { FavoriteProvider } from './context/FavoriteContext';
+import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 import styles from './app.module.scss';
+import { AsteroidFeedList } from './components/AsteroidFeedList';
+import { AsteroidFavoritesList } from './components/AsteroidFavoritesList';
 
-import NxWelcome from './nx-welcome';
-
-import { Route, Routes, Link } from 'react-router-dom';
+const router = createBrowserRouter([
+  {
+    path: '/',
+    element: <Dashboard />,
+    children: [
+      {
+        path: '/',
+        element: <AsteroidFeedList />,
+      },
+      {
+        path: '/favorites',
+        element: <AsteroidFavoritesList />,
+      },
+      {
+        path: '/detail/:id?',
+        element: <AsteroidDetails />,
+      },
+    ],
+  },
+]);
 
 export function App() {
-  const [tickets, setTickets] = useState<any>({});
-
-  useEffect(() => {
-    fetch('/api')
-      .then((t) => t.json())
-      .then(setTickets);
-  }, []);
   return (
-    <div>
-      {/* <NxWelcome title="frontend" /> */}
-
-      {/* START: routes */}
-      {/* These routes and navigation have been generated for you */}
-      {/* Feel free to move and update them to fit your needs */}
-      <br />
-      <hr />
-      <br />
-      {tickets.message}
-      <div role="navigation">
-        <ul>
-          <li>
-            <Link to="/">Home</Link>
-          </li>
-          <li>
-            <Link to="/page-2">Page 2</Link>
-          </li>
-        </ul>
-      </div>
-      <Routes>
-        <Route
-          path="/"
-          element={
-            <div>
-              This is the generated root route.{' '}
-              <Link to="/page-2">Click here for page 2.</Link>
-            </div>
-          }
-        />
-        <Route
-          path="/page-2"
-          element={
-            <div>
-              <Link to="/">Click here to go back to root page.</Link>
-            </div>
-          }
-        />
-      </Routes>
-      {/* END: routes */}
-    </div>
+    <FilterProvider>
+      <FavoriteProvider>
+        <RouterProvider router={router} />
+      </FavoriteProvider>
+    </FilterProvider>
   );
 }
 

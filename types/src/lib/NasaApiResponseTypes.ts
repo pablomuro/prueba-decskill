@@ -1,12 +1,12 @@
 export type NasaApiResponse = {
-  links: Links;
+  links: PaginationLinks;
   element_count: number;
   near_earth_objects: Nearearthobjects;
 };
 type Nearearthobjects = Record<string, AsteroidData[]>;
 
 export type AsteroidData = {
-  links: Pick<Links, 'self'>;
+  links: Pick<PaginationLinks, 'self'>;
   id: string;
   neo_reference_id: string;
   name: string;
@@ -46,7 +46,7 @@ type Kilometers = {
   estimated_diameter_min: number;
   estimated_diameter_max: number;
 };
-type Links = {
+export type PaginationLinks = {
   next: string;
   previous: string;
   self: string;

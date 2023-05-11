@@ -1,6 +1,6 @@
-import { StrictMode } from 'react';
+import { Fragment, StrictMode } from 'react';
 import * as ReactDOM from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import CssBaseline from '@mui/material/CssBaseline';
 
 import App from './app/app';
 
@@ -9,8 +9,9 @@ const root = ReactDOM.createRoot(
 );
 root.render(
   <StrictMode>
-    <BrowserRouter>
+    <Fragment>
+      <CssBaseline />
       <App />
-    </BrowserRouter>
+    </Fragment>
   </StrictMode>
 );

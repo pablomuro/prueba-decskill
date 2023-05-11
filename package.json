@@ -60,8 +60,16 @@
     "vitest": "^0.31.0"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
+    "@fontsource/roboto": "^4.5.8",
+    "@mui/icons-material": "^5.11.16",
+    "@mui/material": "^5.13.0",
+    "@mui/x-data-grid": "^6.3.1",
+    "@mui/x-date-pickers": "^6.3.1",
     "@swc/helpers": "~0.5.0",
     "axios": "^1.0.0",
+    "dayjs": "^1.11.7",
     "express": "^4.17.2",
     "express-html-sanitizer": "^1.0.1",
     "helmet": "^7.0.0",
