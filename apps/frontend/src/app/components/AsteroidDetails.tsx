@@ -6,7 +6,7 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Fragment } from 'react';
+import { Fragment, useEffect } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
 import { useFetchData } from '../hooks/useFetchData';
 import Title from './Title';
@@ -29,6 +29,7 @@ export function AsteroidDetails() {
     data: asteroidData,
     error,
     isFetching,
+    isDone,
     fetchData,
   } = useFetchData<AsteroidData>({
     url: apiUrl,
@@ -36,9 +37,11 @@ export function AsteroidDetails() {
     stopFirstFetch: true,
   });
 
-  if (id) {
-    fetchData();
-  }
+  useEffect(() => {
+    if (id && isDone === false) {
+      fetchData();
+    }
+  }, [id, fetchData, isDone]);
 
   const navigate = useNavigate();
 

@@ -2,6 +2,7 @@ import * as bodyParser from 'body-parser';
 import type { Request, Response } from 'express';
 import express from 'express';
 import sanitizer from 'express-html-sanitizer';
+import helmet from 'helmet';
 import type { DataSource } from 'typeorm';
 
 import { AppRoutes } from './routes';
@@ -14,6 +15,7 @@ export const expressAppSetup = async (dataSource: DataSource) => {
   const router = express.Router();
 
   app.use(bodyParser.json());
+  app.use(helmet());
   app.use(express.urlencoded({ extended: true, limit: '1mb' }));
 
   const sanitizeReqBody = sanitizer();
