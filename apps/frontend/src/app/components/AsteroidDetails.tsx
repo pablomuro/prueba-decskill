@@ -6,9 +6,9 @@ import TableBody from '@mui/material/TableBody';
 import TableCell from '@mui/material/TableCell';
 import TableHead from '@mui/material/TableHead';
 import TableRow from '@mui/material/TableRow';
-import { Fragment, useEffect, useState } from 'react';
+import { Fragment } from 'react';
 import { useLocation, useNavigate, useParams } from 'react-router-dom';
-import { fetchParser } from '../../helpers/fetchMiddlaware';
+import { useFetchData } from '../hooks/useFetchData';
 import Title from './Title';
 
 function Loading() {
@@ -23,37 +23,24 @@ export function AsteroidDetails() {
   const location = useLocation();
   const { id } = useParams();
 
-  const [asteroidData, setAsteroidData] = useState<AsteroidData | null>(
-    location.state
-  );
-  const [isFetching, setIsFetching] = useState<boolean>(false);
-  const [error, setError] = useState<Error | null>(null);
+  const apiUrl = `/api/favorite/${id}`;
+
+  const {
+    data: asteroidData,
+    error,
+    isFetching,
+    fetchData,
+  } = useFetchData<AsteroidData>({
+    url: apiUrl,
+    initialData: location.state,
+    stopFirstFetch: true,
+  });
+
+  if (id) {
+    fetchData();
+  }
 
   const navigate = useNavigate();
-  useEffect(() => {
-    const getFavoriteData = async () => {
-      try {
-        setIsFetching(true);
-        const res = await fetch(`/api/favorite/${id}`);
-
-        const result: AsteroidData = await fetchParser(res);
-        if (result) {
-          setAsteroidData(() => result);
-          setIsFetching(false);
-        } else {
-          setError(Error('Not Found'));
-        }
-      } catch (err) {
-        // debugger;
-        setError(err as Error);
-        setIsFetching(false);
-      }
-    };
-
-    if (!id) return;
-
-    getFavoriteData();
-  }, [id]);
 
   const getCloseApproachDate = (asteroidData: AsteroidData) =>
     asteroidData.close_approach_data[

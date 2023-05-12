@@ -1,36 +1,37 @@
 import { AsteroidData } from '@monorepo/types';
-import { fetchParser } from '../../helpers/fetchMiddlaware';
-import { useContext } from 'react';
+import { useCallback, useContext, useEffect } from 'react';
 import { FavoriteContext } from '../context/FavoriteContext';
+import { useFetchData } from './useFetchData';
 
 const FAV_API_URL = '/api/addAsteroidToFavorite';
 export function useAddFavorites() {
   const { state, dispatch } = useContext(FavoriteContext);
 
-  const resetSuccessfulAdded = () => {
-    dispatch({
-      payload: { successfulAdded: null },
-    });
-  };
-  const addAsteroidToFavorites = async ({
-    id,
-    name,
-    absolute_magnitude_h,
-    is_potentially_hazardous_asteroid,
-  }: Partial<AsteroidData>) => {
-    const body = JSON.stringify({
+  const { data, error, isDone, fetchData } = useFetchData<boolean>({
+    url: FAV_API_URL,
+    stopFirstFetch: true,
+    initialData: false,
+  });
+
+  const addAsteroidToFavorites = useCallback(
+    async ({
       id,
       name,
       absolute_magnitude_h,
       is_potentially_hazardous_asteroid,
-    });
+    }: Partial<AsteroidData>) => {
+      const body = JSON.stringify({
+        id,
+        name,
+        absolute_magnitude_h,
+        is_potentially_hazardous_asteroid,
+      });
 
-    dispatch({
-      payload: { isFetching: true, id },
-    });
+      dispatch({
+        payload: { isFetching: true, id },
+      });
 
-    try {
-      const res = await fetch(FAV_API_URL, {
+      await fetchData({
         method: 'POST',
         body,
         headers: {
@@ -38,23 +39,32 @@ export function useAddFavorites() {
         },
       });
 
-      const result: boolean = await fetchParser(res);
+      dispatch({
+        payload: { isFetching: false, id: undefined },
+      });
+    },
+    [dispatch, fetchData]
+  );
 
-      if (result === true) {
+  useEffect(() => {
+    if (isDone) {
+      if (data === true) {
         dispatch({
           payload: { successfulAdded: true },
         });
+      } else if (error || data === false) {
+        dispatch({
+          payload: { successfulAdded: false },
+        });
       }
-    } catch (error) {
-      dispatch({
-        payload: { successfulAdded: false },
-      });
     }
+  }, [isDone, data, error, dispatch]);
 
+  const resetSuccessfulAdded = useCallback(() => {
     dispatch({
-      payload: { isFetching: false, id: undefined },
+      payload: { successfulAdded: null },
     });
-  };
+  }, [dispatch]);
 
   return {
     successfulAdded: state.successfulAdded,

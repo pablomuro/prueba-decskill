@@ -1,4 +1,3 @@
-import { mockData } from './../../mockData';
 import axios from 'axios';
 import type { Request, Response } from 'express';
 import { AsteroidFavorite } from '../entity/AsteroidFavorite';

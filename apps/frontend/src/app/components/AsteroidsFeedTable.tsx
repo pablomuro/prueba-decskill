@@ -1,81 +1,62 @@
-import {
-  AsteroidData,
-  ApiListResponse,
-  PaginationLinks,
-  ApiFilter,
-} from '@monorepo/types';
+import { ApiListResponse } from '@monorepo/types';
 import { CircularProgress } from '@mui/material';
-import { DataGrid } from '@mui/x-data-grid';
+import { DataGrid, GridEventListener } from '@mui/x-data-grid';
 import { useEffect, useState } from 'react';
-import { fetchParser } from '../../helpers/fetchMiddlaware';
 import { useDateFilter, useFilter } from '../hooks/useDataFilter';
-import { GridEventListener } from '@mui/x-data-grid';
 
 import dayjs from 'dayjs';
-import { dataTableColumns } from './DataTableColumns';
 import { useNavigate } from 'react-router-dom';
+import { useFetchData } from '../hooks/useFetchData';
+import { feedTableColumns } from './DataTableColumns';
 
 export function AsteroidsFeedTable() {
-  const [asteroidsList, setAsteroidsList] = useState<AsteroidData[]>([]);
-  const [paginationLinks, setPaginationLinks] = useState<PaginationLinks>({
-    self: '',
-    next: '',
-    previous: '',
-  });
-
-  const [isFetching, setIsFetching] = useState<boolean>(true);
-  const [error, setError] = useState<Error | null>(null);
-
   const { setDateFilter, getParsedDateFilter } = useDateFilter();
-
   const { isToFilter, setIsToFilter } = useFilter();
+
+  const [filterDateString, setFilterDateString] = useState('');
+  const [url, setUrl] = useState('/api');
+  const { startDate, endDate } = getParsedDateFilter();
 
   const navigate = useNavigate();
 
-  const fetchApiData = (filter?: ApiFilter) => {
-    const { startDate = null, endDate = null } = filter || {};
-    const url = !(startDate && endDate)
-      ? '/api'
-      : `/api?startDate=${startDate}&endDate=${endDate}`;
+  const {
+    data: apiResponse,
+    error,
+    isFetching,
+  } = useFetchData<ApiListResponse>({
+    url,
+  });
 
-    fetch(url)
-      .then(fetchParser)
-      .then((res: ApiListResponse) => {
-        setAsteroidsList(() => res.data);
-        setPaginationLinks(() => res.links);
-        setIsFetching(false);
-      })
-      .catch((err) => {
-        setError(err);
-        setIsFetching(false);
-      });
-  };
+  const asteroidsList = apiResponse?.data;
+  const { self = null } = apiResponse?.links ?? {};
 
   useEffect(() => {
-    fetchApiData();
-  }, []);
+    if (self && self !== filterDateString) {
+      setFilterDateString(self);
+    }
+  }, [self, filterDateString, setFilterDateString]);
 
   useEffect(() => {
-    if (paginationLinks.self) {
+    if (!startDate && !endDate && filterDateString) {
       const [startDate, endDate] =
-        paginationLinks.self.match(/\d{4}-\d{2}-\d{2}/g) || [];
+        filterDateString.match(/\d{4}-\d{2}-\d{2}/g) || [];
       if (startDate && endDate)
         setDateFilter({
           startDate: dayjs(new Date(startDate)),
           endDate: dayjs(new Date(endDate)),
         });
     }
-  }, [paginationLinks.self, setDateFilter]);
+  }, [endDate, filterDateString, setDateFilter, startDate]);
 
   useEffect(() => {
     if (isToFilter) {
       setIsToFilter(false);
-      setIsFetching(true);
-      const dateFilter = getParsedDateFilter();
-
-      fetchApiData(dateFilter);
+      const url = !(startDate && endDate)
+        ? '/api'
+        : `/api?startDate=${startDate}&endDate=${endDate}`;
+      setUrl(url);
     }
-  }, [isToFilter, setIsToFilter, getParsedDateFilter]);
+  }, [isToFilter, setIsToFilter, startDate, endDate]);
 
   const handleEvent: GridEventListener<'rowClick'> = (params, event) => {
     event.stopPropagation();
@@ -90,7 +71,6 @@ export function AsteroidsFeedTable() {
     );
   }
   if (error) {
-    setError(null);
     return (
       <div style={{ display: 'flex', justifyContent: 'center' }}>
         <h1>{error.message}</h1>
@@ -102,7 +82,7 @@ export function AsteroidsFeedTable() {
     <div style={{ minHeight: 300, width: '100%' }}>
       <DataGrid
         rows={asteroidsList}
-        columns={dataTableColumns}
+        columns={feedTableColumns}
         loading={isFetching}
         onRowClick={handleEvent}
         initialState={{

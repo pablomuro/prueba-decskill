@@ -28,40 +28,69 @@ function RenderCellComponent(params: GridRenderCellParams<AsteroidData>) {
   );
 }
 
-export const dataTableColumns: GridColDef[] = [
+const columnDefaults = {
+  field: '',
+  headerName: '',
+  flex: 1,
+  minWidth: 50,
+};
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const valueGetter = ({ value }: { value: any }) =>
+  value && value === true ? 'YES' : 'NO';
+
+export const feedTableColumns: GridColDef[] = [
   {
+    ...columnDefaults,
     field: 'id',
     headerName: 'Neo Id',
-    flex: 1,
-    minWidth: 50,
   },
   {
+    ...columnDefaults,
     field: 'name',
     headerName: 'Name',
-    flex: 1,
-    minWidth: 50,
   },
   {
+    ...columnDefaults,
     field: 'absolute_magnitude_h',
     headerName: 'Absolute Magnitude',
-    flex: 1,
-    minWidth: 50,
   },
   {
+    ...columnDefaults,
     field: 'is_potentially_hazardous_asteroid',
     headerName: 'Is Potentially Hazardous',
-    valueGetter: ({ value }) => (value && value === true ? 'YES' : 'NO'),
-    flex: 1,
-    minWidth: 50,
+    valueGetter: valueGetter,
     align: 'center',
   },
   {
+    ...columnDefaults,
     field: 'fav',
     headerName: 'Action',
-    flex: 1,
-    minWidth: 50,
-
     renderCell: (params: GridRenderCellParams<AsteroidData>) =>
       RenderCellComponent(params),
+  },
+];
+
+export const favTableColumns: GridColDef[] = [
+  {
+    ...columnDefaults,
+    field: 'asteroidNeoId',
+    headerName: 'Neo Id',
+  },
+  {
+    ...columnDefaults,
+    field: 'asteroidName',
+    headerName: 'Name',
+  },
+  {
+    ...columnDefaults,
+    field: 'absoluteMagnitudeH',
+    headerName: 'Absolute Magnitude',
+  },
+  {
+    ...columnDefaults,
+    field: 'isPotentiallyHazardousAsteroid',
+    headerName: 'Is Potentially Hazardous',
+    valueGetter: valueGetter,
   },
 ];

@@ -3,14 +3,17 @@ import { AsteroidDetails } from './components/AsteroidDetails';
 import { FilterProvider } from './context/FilterContext';
 import { FavoriteProvider } from './context/FavoriteContext';
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import styles from './app.module.scss';
 import { AsteroidFeedList } from './components/AsteroidFeedList';
 import { AsteroidFavoritesList } from './components/AsteroidFavoritesList';
+import { ErrorPage } from './components/ErrorPage';
+
+import './app.module.scss';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Dashboard />,
+    errorElement: <ErrorPage />,
     children: [
       {
         path: '/',

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import Snackbar from '@mui/material/Snackbar';
 import IconButton from '@mui/material/IconButton';
 import CloseIcon from '@mui/icons-material/Close';
+import { useAddFavorites } from '../hooks/useFavorites';
 
 type NotificationSnackbarProps = {
   showNotification: boolean | null;
@@ -13,15 +14,15 @@ export function FavoritesNotification({
   const [open, setOpen] = useState(showNotification !== null);
   const success = showNotification !== null && showNotification === true;
 
+  const { resetSuccessfulAdded } = useAddFavorites();
+
   useEffect(() => {
     setOpen(showNotification !== null);
   }, [showNotification]);
 
-  const handleClose = (
-    event: React.SyntheticEvent | Event,
-    reason?: string
-  ) => {
+  const handleClose = () => {
     setOpen(false);
+    resetSuccessfulAdded();
   };
 
   const action = (
