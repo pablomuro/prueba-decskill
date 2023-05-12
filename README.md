@@ -35,3 +35,7 @@ In another a terminal and run:
 - TypeScript
 - Material UI
 - React Router
+
+## SQL Test
+
+File `SQL_QUERY.sql`
