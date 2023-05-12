@@ -59,6 +59,8 @@ export function AsteroidDetails() {
     return (
       <Fragment>
         <IconButton
+          disableFocusRipple
+          disableRipple
           onClick={() => {
             navigate(-1);
           }}
