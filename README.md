@@ -16,6 +16,11 @@ In another a terminal and run:
 
 - `npm run serve-frontend`
 
+## Testing
+
+- `npm run test-api`
+- `npm run test-frontend`
+
 ## Technologies
 
 - Nx for the monorepo

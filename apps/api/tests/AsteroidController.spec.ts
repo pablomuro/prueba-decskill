@@ -1,6 +1,6 @@
 import { describe, expect, test } from '@jest/globals';
 import { expressAppSetup, app } from '../src/app';
-import * as request from 'supertest';
+import request from 'supertest';
 import { DataSource } from 'typeorm';
 import { AsteroidFavorite } from '../src/entity/AsteroidFavorite';
 import 'reflect-metadata';
@@ -15,134 +15,80 @@ const AppDataSource: DataSource = new DataSource({
   subscribers: [],
 });
 
-const URL_PATH = '/asteroid';
+const BASE_URL_PATH = '/api';
 
 describe('AsteroidController.spec test', () => {
   beforeAll(async () => {
     await expressAppSetup(AppDataSource);
   });
 
-  test('Test get method', async () => {
-    const res = await request(app).get(`${URL_PATH}`);
+  test('Test get asteroid feed list', async () => {
+    const res = await request(app).get(`${BASE_URL_PATH}`);
 
-    const { body } = res;
+    const {
+      body: { data },
+    } = res;
     expect(res.statusCode).toBe(200);
-    expect(typeof body).toBe('string');
+    expect(data).toBeDefined();
   });
 
-  test('Test get method with a valid parameter', async () => {
-    let res = await request(app).get(`${URL_PATH}`);
+  test('Test get asteroid feed list with valid filter', async () => {
+    const res = await request(app).get(
+      `${BASE_URL_PATH}?start_date=2015-09-07&end_date=2015-09-08`
+    );
 
-    let { body } = res;
+    const { body: data } = res;
     expect(res.statusCode).toBe(200);
-    expect(typeof body).toBe('string');
-
-    res = await request(app).get(`${URL_PATH}`);
-
-    body = res.body;
-
-    expect(res.statusCode).toBe(200);
-    expect(typeof body).toBe('string');
+    expect(data).toBeDefined();
   });
 
-  test('Test create new asteroid', async () => {
+  test('Test create new asteroid favorite', async () => {
     const res = await request(app)
-      .post(`${URL_PATH}`)
-      .send({ asteroid: 'New Test asteroid' });
+      .post(`${BASE_URL_PATH}/addAsteroidToFavorite`)
+      .send({
+        id: '2465633',
+        name: '465633 (2009 JR5)',
+        absolute_magnitude_h: '20.48',
+        is_potentially_hazardous_asteroid: true,
+      });
 
     const { body } = res;
 
     expect(res.statusCode).toBe(200);
-    expect(body.asteroidText).not.toBe(undefined);
-    expect(body.asteroidText).toBe('New Test asteroid');
+    expect(body).toBeTruthy();
   });
 
-  test('Test create new asteroid with invalid param', async () => {
-    const res = await request(app).post(`${URL_PATH}`).send({ asteroid: '' });
+  test('Test create new asteroid favorite with same id', async () => {
+    const res = await request(app)
+      .post(`${BASE_URL_PATH}/addAsteroidToFavorite`)
+      .send({
+        id: '2465633',
+        name: '465633 (2009 JR5)',
+        absolute_magnitude_h: '20.48',
+        is_potentially_hazardous_asteroid: true,
+      });
 
     const { body } = res;
 
     expect(res.statusCode).toBe(400);
-    expect(body).toBe('Invalid asteroid Text');
+    expect(body).toBeFalsy();
   });
 
-  test('Test edit asteroid', async () => {
-    let res = await request(app)
-      .post(`${URL_PATH}`)
-      .send({ asteroid: 'New Test asteroid' });
+  test('Test get favorite details', async () => {
+    const res = await request(app).get(`${BASE_URL_PATH}/favorite/1`);
 
     const {
-      body: { id },
+      body: { id, name },
     } = res;
 
-    res = await request(app)
-      .put(`${URL_PATH}`)
-      .send({ number: id, asteroid: 'Edited Test asteroid' });
-
-    const { body } = res;
-
     expect(res.statusCode).toBe(200);
-    expect(body.id).toBe(id);
-    expect(body.asteroidText).toBe('Edited Test asteroid');
+    expect(id).toBe(id);
+    expect(name).toBe('465633 (2009 JR5)');
   });
 
-  test('Test edit asteroid with invalid param', async () => {
-    let res = await request(app)
-      .put(`${URL_PATH}`)
-      .send({ number: '', asteroid: 'Edited Test asteroid' });
-
-    let { body } = res;
-
-    expect(res.statusCode).toBe(400);
-    expect(body).toBe('Invalid Id');
-
-    res = await request(app)
-      .put(`${URL_PATH}`)
-      .send({ number: -1, asteroid: 'Edited Test asteroid' });
-
-    body = res.body;
-
-    expect(res.statusCode).toBe(400);
-    expect(body).toBe('Invalid Id');
-
-    res = await request(app)
-      .put(`${URL_PATH}`)
-      .send({ number: 1, asteroid: '' });
-
-    body = res.body;
-
-    expect(res.statusCode).toBe(400);
-    expect(body).toBe('Invalid asteroid Text');
-  });
-
-  test('Test delete asteroid', async () => {
-    let res = await request(app)
-      .post(`${URL_PATH}`)
-      .send({ asteroid: 'New Test asteroid' });
-
-    const {
-      body: { id },
-    } = res;
-
-    res = await request(app).delete(`${URL_PATH}`).send({ number: id });
-
+  test('Test get favorite details with invalid id', async () => {
+    const res = await request(app).get(`${BASE_URL_PATH}/favorite/999`);
     const { body } = res;
-
-    expect(res.statusCode).toBe(200);
-    expect(body).toBe('asteroid Removed');
-  });
-
-  test('Test delete asteroid with invalid param', async () => {
-    let res = await request(app).delete(`${URL_PATH}`).send({ number: '' });
-
-    let { body } = res;
-
-    expect(res.statusCode).toBe(400);
-    expect(body).toBe('Invalid Id');
-
-    res = await request(app).delete(`${URL_PATH}`).send({ number: 999 });
-
-    body = res.body;
 
     expect(res.statusCode).toBe(400);
     expect(body).toBe('Not Found');
